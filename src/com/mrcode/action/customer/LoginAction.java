@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.mrcode.service.CustomerService;
+import com.mrcode.utils.Const;
 import com.mrcode.utils.DigestUtil;
 import com.mrcode.base.BaseAction;
 import com.mrcode.common.ViewLocation;
@@ -18,7 +19,7 @@ import com.opensymphony.xwork2.ActionContext;
 @Controller
 @ParentPackage("customers")
 @Namespace("/customer")
-public class CustomerAction extends BaseAction<Customer>{
+public class LoginAction extends BaseAction<Customer>{
 
 	@Autowired
 	CustomerService customerService;
@@ -37,16 +38,32 @@ public class CustomerAction extends BaseAction<Customer>{
 	 * @return
 	 */
 	@Action(value = "login", results = { @Result(name = "toLogin", type = TYPE_CHAIN, location = "toLogin"),
-			@Result(name = "toIndex", location = ViewLocation.View_ROOT+"hotel.html")})
+			@Result(name = "toIndex", location = "/WEB-INF/" +"index.jsp")})
 	public String login() throws Exception{
 		// 获取数据
 		String loginName = getParameter("loginName");
 		String password = getParameter("password");
 		
-		if(customerService.checkLogin(loginName, DigestUtil.encryptPWD(password))!=null){
+		Customer customer = null;
+		if((customer = customerService.checkLogin(loginName, DigestUtil.encryptPWD(password)))!=null){
+			session.put(Const.CUSTOMER, customer);
+			System.out.println("登陆成功");
 			return "toIndex";
-		}
-		
+		} else {
+		System.out.println("登陆失败");
 		return "toLogin";
+		}
 	}
+	
+	/**
+	 * 首页
+	 * @return
+	 */
+	@Action(value = "toIndex", results = {
+			@Result(name = "index", location = "/WEB-INF/" +"index.jsp")})
+	public String index() throws Exception{
+	
+		return "index";
+		}
+
 }
